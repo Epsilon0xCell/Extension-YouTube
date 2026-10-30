@@ -1,9 +1,8 @@
-import YTMusic from 'ytmusic-api';
 import { INJECT_ID, InjectionPosition } from './constants';
 import { getSettings } from './settings';
-import { initYTMusicClient, checkCookieExpiration } from './auth';
+import { checkCookieExpiration } from './auth';
 
-const { setExtensionPrompt, substituteParamsExtended } = SillyTavern.getContext();
+const { setExtensionPrompt } = SillyTavern.getContext();
 
 export function resetInject() {
     // Reset the prompt to avoid showing old data
@@ -17,39 +16,14 @@ export async function setCurrentTrack(): Promise<void> {
         return;
     }
 
-    try {
-        checkCookieExpiration(settings);
-        const ytMusic = await initYTMusicClient(settings);
-        if (!ytMusic) {
-            return;
-        }
+    checkCookieExpiration(settings);
 
-        // Get the currently playing track
-        // Note: YTMusic API doesn't have a direct "get currently playing" method
-        // We'll use the history to get the most recent track as a workaround
-        const history = await ytMusic.getHistory();
-        if (!history || history.length === 0) {
-            console.log('No recent tracks in YouTube Music history');
-            return;
-        }
-
-        // Get the most recent track from history
-        const currentTrack = history[0];
-        console.log('Most recent YouTube Music track:', currentTrack);
-
-        // Extract track details for the prompt
-        const params = {
-            song: currentTrack.title,
-            artist: Array.isArray(currentTrack.artists) 
-                ? currentTrack.artists.map((a: any) => a.name).join(', ') 
-                : currentTrack.artists?.name || 'Unknown Artist',
-            album: currentTrack.album?.name || '',
-            // YouTube Music doesn't have release years directly available in the API
-        };
-
-        const message = substituteParamsExtended(settings.template, params);
-        setExtensionPrompt(INJECT_ID, message, settings.position, settings.depth, settings.scan, settings.role);
-    } catch (error) {
-        console.error('Error fetching currently playing track from YouTube Music:', error);
-    }
+    // ytmusic-api 4.x, the version this extension depends on, has no
+    // now-playing endpoint and no listening-history endpoint. The
+    // previous implementation called a getHistory() method that does
+    // not exist in the library, so this interceptor could never inject
+    // anything (and the project did not compile). Until the library
+    // offers history access, the interceptor clears any stale injection
+    // and leaves the prompt unchanged instead of failing.
+    console.log('YouTube Music: current-track injection is unavailable because ytmusic-api 4.x provides no history or now-playing endpoint.');
 }

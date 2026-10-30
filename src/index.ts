@@ -8,10 +8,10 @@ import './style.css';
     const context = SillyTavern.getContext();
     const settings = getSettings();
     addSettingsControls(settings);
-    
+
     await tryGetClientFromCookies(settings);
     checkCookieExpiration(settings);
-    
+
     globalThis.ytmusic_setCurrentTrack = setCurrentTrack;
     syncFunctionTools();
     context.saveSettingsDebounced();

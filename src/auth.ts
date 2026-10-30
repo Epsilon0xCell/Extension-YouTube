@@ -1,7 +1,5 @@
 import YTMusic from 'ytmusic-api';
 import { getSettings, ExtensionSettings } from './settings';
-import { COOKIE_KEY } from './constants';
-import { YTMusicCookies } from './types';
 
 const { t, saveSettingsDebounced } = SillyTavern.getContext();
 
@@ -14,7 +12,16 @@ export async function initYTMusicClient(settings: ExtensionSettings): Promise<YT
     }
 
     try {
-        ytMusicClient = new YTMusic({ cookie: settings.cookieData.cookie });
+        // ytmusic-api 4.x takes no constructor options. Cookies are passed
+        // to initialize(), which parses them and loads the site config.
+        // The previous code passed { cookie: ... } to the constructor,
+        // which the library ignores, so no session was ever set up.
+        const client = new YTMusic();
+        const initialized = await client.initialize(settings.cookieData.cookie);
+        if (!initialized) {
+            throw new Error('Cookie string could not be parsed');
+        }
+        ytMusicClient = client;
         return ytMusicClient;
     } catch (error) {
         console.error('Error initializing YouTube Music client:', error);
@@ -41,15 +48,22 @@ export async function importYTMusicCookies(cookieString: string): Promise<void> 
     const settings = getSettings();
 
     try {
-        // Test connection with the cookies first
-        const testClient = new YTMusic({ cookie: cookieString });
-        // If successful, save the cookies and initialize client
+        // Actually initialize a client with the cookies before saving
+        // them. The previous code only constructed a client object and
+        // then reported success without any check, so invalid cookies
+        // were stored and announced as a successful login.
+        const testClient = new YTMusic();
+        const initialized = await testClient.initialize(cookieString);
+        if (!initialized) {
+            throw new Error('Cookie string could not be parsed');
+        }
         settings.cookieData = {
             cookie: cookieString,
-            expires: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days expiration
+            expires: Date.now() + (30 * 24 * 60 * 60 * 1000), // 30 days expiration
         };
         saveSettingsDebounced();
         ytMusicClient = testClient;
+        setUserName(t`[Authenticated]`);
         toastr.success(t`Successfully authenticated with YouTube Music!`);
     } catch (error) {
         console.error('Error during YouTube Music authentication:', error);
@@ -66,9 +80,9 @@ export async function tryGetClientFromCookies(settings: ExtensionSettings): Prom
     try {
         const client = await initYTMusicClient(settings);
         if (client) {
-            // Try to get user account info to confirm authentication
-            const accountInfo = await client.getAccountInfo();
-            setUserName(accountInfo.name || t`[Authenticated]`);
+            // ytmusic-api 4.x exposes no account info endpoint, so a
+            // successful initialize() is the strongest check available.
+            setUserName(t`[Authenticated]`);
         }
     } catch (error) {
         console.error('Error fetching account data:', error);
@@ -86,7 +100,7 @@ export function checkCookieExpiration(settings: ExtensionSettings): void {
     // If cookies are about to expire (within 3 days), show a warning
     const warningThreshold = 3 * 24 * 60 * 60 * 1000; // 3 days
     const currentTime = Date.now();
-    
+
     if ((settings.cookieData.expires - currentTime) < warningThreshold) {
         toastr.warning(t`Your YouTube Music cookies will expire soon. Please update them.`, '', { timeOut: 10000 });
     }

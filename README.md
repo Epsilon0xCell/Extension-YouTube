@@ -1,90 +1,107 @@
+![banner](assets/banner.png)
+
 # YouTube Music Extension for SillyTavern
 
-Provides function tools and information about the currently playing song on YouTube Music in SillyTavern prompts.
+A SillyTavern extension that adds YouTube Music function tools, backed
+by the `ytmusic-api` library (version 4.x). Search tools return real
+results; a few tools the library cannot support answer with an explicit
+limitation message instead of data (see the tool list below).
 
 ## Installation
 
-Requires the latest SillyTavern staging branch.
+Requires the SillyTavern staging branch.
 
 Install via the extension installer using the following URL:
 
 ```txt
-https://github.com/SillyTavern/Extension-Spotify
+https://github.com/Epsilon0xCell/Extension-YouTube
 ```
 
-## Usage
+## Authentication
 
-> **Requires YouTube Music cookies for authentication**
+The extension authenticates with a YouTube Music cookie string. There
+is no OAuth flow.
 
-### How to Get Your Cookies
+### How to get your cookies
 
 1. Log in to [YouTube Music](https://music.youtube.com/) in your browser
-2. Open developer tools (F12 or right-click > Inspect)
+2. Open developer tools (F12 or right-click, then Inspect)
 3. Go to the Application tab
-4. In the sidebar, navigate to Storage > Cookies > https://music.youtube.com
-5. Copy the cookie values (you'll need to format them as cookie strings, e.g., "CONSENT=YES+; VISITOR_INFO1_LIVE=somevalue; ...")
+4. In the sidebar, navigate to Storage, then Cookies, then
+   https://music.youtube.com
+5. Copy the cookie values and format them as one cookie string with
+   entries separated by `; `, for example
+   `CONSENT=YES+; VISITOR_INFO1_LIVE=somevalue; ...`
 
-### Authentication
+### Signing in
 
-1. Paste the cookie string into the "YouTube Music Cookies" field in the extension settings
+1. Paste the cookie string into the "YouTube Music Cookies" field in
+   the extension settings
 2. Click "Authenticate"
-3. If successful, you'll see your YouTube Music account name displayed
+3. The extension initializes a client with the cookies first and only
+   saves them if that succeeds. On success the settings show
+   `[Authenticated]`. The library exposes no account endpoint, so your
+   account name is not displayed.
 
-> **Note**: Cookies have an expiration date, and you'll be notified when they're about to expire.
+The stored expiry is a fixed 30-day estimate counted from sign-in, not
+the real expiry of any individual cookie. The extension warns you when
+that estimate is within 3 days.
 
-## Configuration
+## Function tools
 
-After performing the initial setup, the extension will be able to access your YouTube Music account and provide information about your recently played songs. You can configure the extension, including the injection template, role, position and depth.
+The extension registers the following function tools, each toggleable
+in the extension settings. "Search Songs", "Play Item", and "Get
+Current Song" are enabled by default; the rest are disabled by
+default.
 
-### Template macros
+Working tools, backed by the library:
 
-Apart from the usual SillyTavern macros, the template field also supports the following additional parameters:
+1. "Search Songs": search for songs by name or artist
+2. "Search Artists": search for artists by name
+3. "Search Albums": search for albums by title or artist
+4. "Play Item": returns a music.youtube.com URL for a song or
+   playlist for you to open. It cannot start playback itself.
+5. "Get Playlist Items": lists the tracks of a playlist by playlist ID
 
-- `{{song}}`: The name of the song
-- `{{artist}}`: The name of the artist
-- `{{album}}`: The name of the album (if available)
+Tools that report a limitation, because ytmusic-api 4.x provides no
+endpoint for them:
 
-Example:
+6. "Get Current Song": no now-playing or history endpoint exists in
+   the library, so the tool explains that it cannot return a song
+7. "Get Queue": the library provides no queue access
+8. "Get History": the library provides no listening history
+9. "Get User Playlists": the library can search public playlists but
+   cannot list your library playlists
 
-```txt
-{{user}} is listening to {{song}} by {{artist}} from the album {{album}}.
-```
+## Prompt injection
 
-### Function tools
+The settings include an injection template with `{{song}}`, `{{artist}}`,
+and `{{album}}` macros, plus role, position, and depth controls. At
+present nothing is injected: filling the template needs the most
+recently played track, and ytmusic-api 4.x has neither a now-playing
+nor a history endpoint. The interceptor runs on each generation, clears
+any stale injection, and logs why. The template settings are kept so
+the feature can resume if the library adds history access.
 
-The extension provides [function tools](https://docs.sillytavern.app/for-contributors/function-calling/) for YouTube Music API. The following functions are available (can be toggled individually in the extension settings):
-
-1. "Search Songs": Search for songs by name or artist
-2. "Search Artists": Search for artists by name
-3. "Search Albums": Search for albums
-4. "Play Item": Provides a URL to play a song or playlist
-5. "Get Current Song": Gets the most recently played song (YouTube Music API limitation)
-6. "Get Queue": Information about the queue (limited by YouTube Music API)
-7. "Get History": Gets your recently played tracks
-8. "Get User Playlists": Gets playlists of the user
-9. "Get Playlist Items": Gets a list of tracks from a playlist
-
-> "Search Songs", "Play Item" and "Get Current Song" are enabled by default. The rest are disabled by default.
-
-## YouTube Music API Limitations
-
-The extension uses an unofficial YouTube Music API and may have some limitations compared to the official Spotify API:
-
-- "Current Track" is based on the most recently played song in your history
-- Some playback controls are limited to providing URLs (to be opened by the user)
-- Some YouTube Music features may require authentication renewal more frequently
-
-## Contributing
-
-To build the extension, run the following command in the root directory of the extension:
+## Building
 
 ```bash
 npm install
 npm run build
 ```
 
-**Create an issue** if you have ideas for new function tools.
-**Create a pull request** if you want to contribute to the extension.
+The build compiles `src/` with webpack and TypeScript into
+`dist/index.js`, the file `manifest.json` loads. `npm run lint` runs
+ESLint, and `npx tsc --noEmit` type-checks; both pass. The webpack
+build finishes with warnings from the ytmusic-api dependency chain
+(it is written for Node and references Node builtins) and a bundle-size
+warning; these come from the library, not from this code.
+
+What cannot be verified outside SillyTavern: the settings UI, the
+function-tool registration, and live calls against a real YouTube Music
+account all need a running SillyTavern with your cookies. The build,
+type check, lint, manifest validation, and the pure URL-parsing helpers
+in `src/util.ts` are verified headlessly.
 
 ## License
 

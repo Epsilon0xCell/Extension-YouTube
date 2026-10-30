@@ -1,5 +1,5 @@
 import { InjectionPosition, InjectionRole, MODULE_NAME } from './constants';
-import { setUserName, importYTMusicCookies, tryGetClientFromCookies } from './auth';
+import { setUserName, importYTMusicCookies } from './auth';
 import { syncFunctionTools, YTMusicTool } from './tools';
 import { resetInject } from './prompt';
 import { YTMusicCookies } from './types';
