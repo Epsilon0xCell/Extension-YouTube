@@ -10,6 +10,13 @@ export function resetInject() {
 }
 
 export async function setCurrentTrack(): Promise<void> {
+    // Clearing comes first and is currently the whole job. The settings
+    // checked below (template, position) still gate this function even
+    // though nothing is injected after them, so a user who sets the
+    // position to None and one who leaves it on InChat get the same
+    // empty prompt. I keep the checks so the day the library gains a
+    // history call, the wiring is already in the order it needs: clear
+    // the stale entry before writing the fresh one.
     resetInject();
     const settings = getSettings();
     if (!settings.cookieData || !settings.template || settings.position === InjectionPosition.None) {

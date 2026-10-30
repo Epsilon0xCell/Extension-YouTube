@@ -1,8 +1,21 @@
+// I handle sign-in here, and the only credential I have to work with is
+// the cookie string the user pastes into the settings panel. SillyTavern
+// stores it inside its own settings, so it sits on disk in plain text
+// next to every other extension setting. I cannot change where
+// SillyTavern puts its settings, but nobody should mistake the saved
+// cookie for a vault: anyone who can read that settings file has the
+// session.
 import YTMusic from 'ytmusic-api';
 import { getSettings, ExtensionSettings } from './settings';
 
 const { t, saveSettingsDebounced } = SillyTavern.getContext();
 
+// This looks like a shared client cache. It is not, yet. initYTMusicClient
+// builds a fresh client on every call and stores it here, and nothing
+// reads the stored value back before building the next one. So every
+// tool call in tools.ts pays a full initialize round trip. I keep the
+// variable because the return paths hand it out, but a reader should
+// not assume calls are being reused.
 let ytMusicClient: YTMusic | null = null;
 
 export async function initYTMusicClient(settings: ExtensionSettings): Promise<YTMusic | null> {
@@ -24,6 +37,12 @@ export async function initYTMusicClient(settings: ExtensionSettings): Promise<YT
         ytMusicClient = client;
         return ytMusicClient;
     } catch (error) {
+        // A failed initialize deletes the saved cookies, whatever caused
+        // it. That is the right answer for a cookie string YouTube
+        // rejects, and a harsh one for a network hiccup at startup,
+        // because the user has to paste the cookies again either way.
+        // initialize() gives me no way to tell the two apart, so I do
+        // not pretend to.
         console.error('Error initializing YouTube Music client:', error);
         settings.cookieData = null;
         setUserName(t`[Auth failed]`);
@@ -33,6 +52,10 @@ export async function initYTMusicClient(settings: ExtensionSettings): Promise<YT
 }
 
 export function setUserName(name: string): void {
+    // The span only exists after addSettingsControls has run, which is
+    // why index.ts builds the settings UI before it tries the saved
+    // cookies. Run auth first and this quietly does nothing, and the
+    // panel would keep whatever label the HTML shipped with.
     const userName = document.getElementById('ytmusic_user_name') as HTMLSpanElement;
     if (userName) {
         userName.innerText = name;
@@ -59,7 +82,12 @@ export async function importYTMusicCookies(cookieString: string): Promise<void> 
         }
         settings.cookieData = {
             cookie: cookieString,
-            expires: Date.now() + (30 * 24 * 60 * 60 * 1000), // 30 days expiration
+            // The 30 days are my estimate, stamped at paste time.
+            // Nothing from YouTube reports the real expiry back to me,
+            // so the warning in checkCookieExpiration counts down to a
+            // date I invented. A session can die weeks before it, or
+            // outlive it.
+            expires: Date.now() + (30 * 24 * 60 * 60 * 1000),
         };
         saveSettingsDebounced();
         ytMusicClient = testClient;
@@ -97,7 +125,10 @@ export function checkCookieExpiration(settings: ExtensionSettings): void {
         return;
     }
 
-    // If cookies are about to expire (within 3 days), show a warning
+    // Once the stored date is inside this window the warning fires on
+    // every call, and callers run this at startup and before most tool
+    // calls, so the user sees the same toast again and again until they
+    // paste fresh cookies. There is no "warned already" flag.
     const warningThreshold = 3 * 24 * 60 * 60 * 1000; // 3 days
     const currentTime = Date.now();
 

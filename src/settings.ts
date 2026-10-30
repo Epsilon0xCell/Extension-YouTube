@@ -36,6 +36,10 @@ const defaultSettings: Readonly<ExtensionSettings> = Object.freeze({
     depth: 1,
     scan: true,
     searchSongs: true,
+    // getCurrentSong defaults on even though its callback can only
+    // return the library limitation message in tools.ts. I left the
+    // default as the adaptation shipped it, but a new user gets a
+    // registered tool that never returns a song.
     getCurrentSong: true,
     getQueue: false,
     playItem: true,
@@ -49,7 +53,10 @@ const defaultSettings: Readonly<ExtensionSettings> = Object.freeze({
 export function getSettings(): ExtensionSettings {
     const context = SillyTavern.getContext();
     const globalSettings = context.extensionSettings as object as GlobalSettings;
-    // Initialize settings if they don't exist
+    // Initialize settings if they don't exist. The clone matters:
+    // defaultSettings is frozen, and every caller mutates the object
+    // this function returns, so handing out the frozen original would
+    // throw on the first write.
     if (!globalSettings[MODULE_NAME]) {
         globalSettings[MODULE_NAME] = structuredClone(defaultSettings);
     }
@@ -166,6 +173,11 @@ export function addSettingsControls(settings: ExtensionSettings): void {
     });
 
     elements.logoutButton.addEventListener('click', () => {
+        // Logout clears the saved cookies, and the registered tools
+        // disappear on the next sync because their settings still read
+        // as on but isToolValid checks the cookies. The client object
+        // in auth.ts is not cleared here, so it keeps a live session in
+        // memory until the page reloads or a new client replaces it.
         settings.cookieData = null;
         setUserName(t`[Not logged in]`);
         saveSettingsDebounced();

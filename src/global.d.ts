@@ -4,6 +4,12 @@
 // (TS2669) and every SillyTavern and toastr reference failed to resolve.
 export {};
 
+// I wrote these declarations by hand against the parts of the
+// SillyTavern context this extension actually touches. They are a
+// floor, not the real API: a method I have not used is not declared,
+// and registerFunctionTool takes unknown because the real signature
+// expects a tool shape defined inside SillyTavern, which this project
+// cannot import.
 interface SillyTavernContext {
     getContext: () => {
         t: (str: TemplateStringsArray | string) => string;

@@ -253,6 +253,9 @@ function formatDuration(totalSeconds?: number): string | undefined {
     if (totalSeconds === undefined) {
         return undefined;
     }
+    // No hour handling: a 90 minute mix renders as 90:00, not 1:30:00.
+    // Track lengths from search rarely get near that, so I never added
+    // the branch, but a long podcast episode would expose it.
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -272,10 +275,19 @@ function songToViewModel(song: SongLike): TrackViewModel {
 }
 
 async function isToolValid(): Promise<boolean> {
+    // Registration only asks whether a cookie string exists. It does not
+    // test the cookie, so tools can be registered on a session that died
+    // days ago and each call then fails inside its own try block.
     const settings = getSettings();
     return !!settings.cookieData;
 }
 
+// The three search callbacks and getPlaylistItemsCallback all repeat
+// the same opening: read settings, refuse without cookies, warn about
+// expiry, build a client. I kept the copies instead of a shared wrapper
+// because each one returns different error text to the model, and the
+// model acts on that text. The cost is real though: a change to the
+// opening has to be made in four places or the tools drift apart.
 async function searchSongsCallback({ query }: SearchSongsParameters): Promise<string | TrackViewModel[]> {
     try {
         const settings = getSettings();
@@ -363,6 +375,12 @@ async function playItemCallback({ videoId, playlistId }: PlayItemParameters): Pr
 
         // Note: ytmusic-api doesn't directly support playback control
         // We'll instead return a URL that the user can open
+        // So the tool named Play Item plays nothing. I keep the name the
+        // upstream extension used because the model picks tools by name
+        // and description, but the honest description of the result is
+        // a link, and the chat has to say so instead of claiming the
+        // song started. If both IDs arrive, the video wins and the
+        // playlist is silently dropped.
 
         if (videoId) {
             return `To play this song, open: https://music.youtube.com/watch?v=${videoId}`;
@@ -459,6 +477,10 @@ export function syncFunctionTools(): void {
     const context = SillyTavern.getContext();
     const settings = getSettings();
 
+    // The settings keys and the TOOL_DEFINITIONS keys have to stay the
+    // same set of names. A tool renamed in one place and not the other
+    // reads as undefined here, which this loop treats as switched off,
+    // so the failure mode is a tool that quietly never registers.
     for (const [key, definition] of Object.entries(TOOL_DEFINITIONS)) {
         if (settings[key as YTMusicTool]) {
             context.registerFunctionTool(definition);

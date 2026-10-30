@@ -1,11 +1,22 @@
 /**
  * Utility functions for YouTube Music extension
+ *
+ * A reader should know before using anything here: as of the current
+ * source, nothing in src/ calls the three helpers in this file. They
+ * came over from the Spotify extension this project was adapted from,
+ * where playback state used them, and my YouTube tools ended up taking
+ * IDs straight from search results instead. I leave them because the
+ * URL forms below are the ones a play-by-link tool would need, but
+ * they are untested by any live path in this build.
  */
 
 export function generateRandomString(length: number): string {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const values = crypto.getRandomValues(new Uint8Array(length));
     return Array.from(values)
+        // 256 does not divide evenly by 62, so the first characters in
+        // the alphabet come up slightly more often than the last ones.
+        // Fine for an opaque label, wrong for anything secret.
         .map(x => possible[x % possible.length])
         .join('');
 }
@@ -23,7 +34,11 @@ export function normalizeVideoId(input: string): string | null {
         return input;
     }
 
-    // Extract from YouTube/YouTube Music URLs
+    // Extract from YouTube/YouTube Music URLs. Two gaps I know about:
+    // shorts and live URLs carry the ID in the path with no v= at all,
+    // so they return null here, and the second pattern needs the v=
+    // somewhere after the domain, so a bare youtu.be link only ever
+    // matches the first pattern.
     const patterns = [
         /(?:youtube\.com\/watch\?v=|youtu\.be\/|music\.youtube\.com\/watch\?v=)([A-Za-z0-9_-]{11})/,
         /(?:youtube\.com|music\.youtube\.com)\/.*[?&]v=([A-Za-z0-9_-]{11})/,
@@ -63,7 +78,11 @@ export function normalizePlaylistId(input: string): string | null {
     return null;
 }
 
-// Common configuration for JSON parsing with more relaxed rules
+// Common configuration for JSON parsing with more relaxed rules.
+// This is shaped like an HTTP client transform config, and no HTTP
+// client in the current source uses it: ytmusic-api does its own
+// fetching. The cleanup below only removes trailing commas. A response
+// broken in any other way still throws from the second parse.
 export const laxJsonConfig = {
     transformResponse: [(data: string) => {
         try {
