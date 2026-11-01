@@ -1,111 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Extension YouTube: what it is, how it runs, where it stops</title>
-<meta name="description" content="A SillyTavern extension that adds YouTube Music function tools, backed by the ytmusic-api library (version 4.x). Search tools return real results; a f">
-<style>
-:root {
-  --bg: #101214; --panel: #1c1f22; --ink: #eee8dc;
-  --mut: #25292d;
-  --acc: #e8b339; --acc2: #c75432;
-  --line: #1c1f22;
-}
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink);
-  font-family: ' Gill Sans', 'Segoe UI', sans-serif; line-height: 1.55; }
-code, pre, .mono { font-family: 'SF Mono', monospace; }
-a { color: var(--acc2); }
-.hero { padding: 3rem 6vw 1rem; }
-.hero img.banner { width: 100%; height: auto; border: 1px solid var(--line);
-  border-radius: 10px; }
-.logo { width: 92px; height: 92px; border-radius: 18px;
-  border: 1px solid var(--line); }
-h1 { font-size: 2.4rem; margin: 0.4em 0 0.1em; }
-h2 { border-bottom: 2px solid var(--acc); padding-bottom: 0.2em;
-  margin-top: 2em; }
-.lede { font-size: 1.15rem; max-width: 62ch; }
-main { padding: 0 6vw 3rem; max-width: 1180px; margin: 0 auto; }
-.grid { display: grid; gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
-.card { background: var(--panel); border: 1px solid var(--line);
-  border-radius: 12px; padding: 1rem 1.2rem; }
-.card.pop { animation: rise 0.7s ease both; }
-@keyframes rise { from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: none; } }
-pre.code { background: #101014; color: #e8e6df; padding: 1rem 1.2rem;
-  border-radius: 12px; overflow-x: auto; font-size: 0.86rem;
-  border-left: 5px solid var(--acc); }
-table { border-collapse: collapse; width: 100%; }
-td, th { border-bottom: 1px solid var(--line); padding: 0.45rem 0.6rem;
-  text-align: left; }
-.shots { display: grid; gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-.shots img { width: 100%; height: auto; border: 1px solid var(--line);
-  border-radius: 10px; background: #f4f1e8; }
-footer { padding: 2rem 6vw; border-top: 1px solid var(--line);
-  color: var(--mut); }
-.rail { display: flex; gap: 1.2rem; align-items: flex-start; }
-.rail nav { position: sticky; top: 1rem; min-width: 180px; }
-@media (max-width: 760px) { .rail { flex-direction: column; }
-  .rail nav { position: static; } }
-@media (prefers-reduced-motion: reduce) {
-  .card.pop { animation: none; } * { scroll-behavior: auto; } }
-</style>
-</head>
-<body class="layout-poster">
-<!-- This page exists for Extension-YouTube alone: the layout (poster),
-     the colors, and the type were picked for this project, not
-     shared with the other project pages. The code block below is
-     copied from the file it names, line for line. If it looks
-     plain, that is because the project is plain, and I would
-     rather the page match the project than dress it up. The one
-     thing I will not do here is oversell: what this project does
-     not do is stated on the page, not hidden from it. -->
-<header class="hero">
-  <img class="logo" src="assets/logo.png" alt="Extension YouTube logo">
-  <img class="banner" src="assets/banner.png" alt="">
-  <h1>Extension YouTube</h1>
-  <p class="mono"><a href="https://github.com/Epsilon0xCell/Extension-YouTube">github.com/Epsilon0xCell/Extension-YouTube</a></p>
-</header>
-
-<main>
-  <section class="rail">
-    <nav aria-label="on this page">
-      <p class="mono"><a href="#run">Run it</a><br>
-      <a href="#files">The files</a><br>
-      <a href="#sheets">The sheets</a><br>
-      <a href="https://github.com/Epsilon0xCell/Extension-YouTube">The repo</a></p>
-    </nav>
-    <div>
-      <p class="lede">A SillyTavern extension that adds YouTube Music function tools, backed by the ytmusic-api library (version 4.x). Search tools return real results; a few tools the library cannot support answer with an explicit limitation message instead of data (see the tool list below).</p>
-      <div class="grid">
-        <div class="card pop"><h3>What it is</h3>
-          <p>Extension YouTube: 25 files, 5005 counted
-          lines across JSON 3654, TypeScript 1078, Markdown 108. One job, done in the
-          open, in files you can read.</p></div>
-        <div class="card pop"><h3>The biggest piece</h3>
-          <p><code>package-lock.json</code> carries the most
-          lines. If the project grows, that file is where the growth
-          lands first, for better or worse.</p></div>
-        <div class="card pop"><h3>The honest gap</h3>
-          <p>No test files yet. That is the honest gap, and the roadmap in the visuals folder says what the first one should cover.</p></div>
-      </div>
-      <section id="run">
-        <h2>Run it</h2>
-        <p>The repo README has the exact commands for this one. The
-        shape is the shape for most of my projects: clone it, read the
-        top file first so you know what will happen, then run it on
-        something you do not mind breaking.</p>
-        <p class="mono">$ git clone https://github.com/Epsilon0xCell/Extension-YouTube.git<br>$ cd Extension-YouTube</p>
-      </section>
-      
-  <section aria-label="real code">
-    <h2>The code, as it sits in the repo</h2>
-    <p>From <code>package-lock.json</code>, line 1799 on. I did
-    not tidy it for the page. What you see is what the file has.</p>
-    <pre class="code"><code>        &quot;node_modules/function-bind&quot;: {
+<style>@font-face{font-family:Akatab;src:url(fonts/Akatab.ttf)}@font-face{font-family:Bitter;src:url(fonts/Bitter.ttf)}
+:root{--white:#f7f3e8;--sand:#d8c7a3;--blue:#2e4a7a;--lav:#7a5fa0}
+*{box-sizing:border-box}body{margin:0;background:var(--white);color:var(--blue);font-family:Bitter,Georgia,serif;line-height:1.6}
+h1,h2,h3{font-family:Akatab,sans-serif;line-height:1.1}a{color:var(--blue);text-decoration:none;border-bottom:4px solid #d9c9a0}a:hover{border-bottom-color:#b9a86a}
+.cabinet{max-width:860px;margin:0 auto;padding:24px 18px 60px}
+.shelf{border:3px solid var(--sand);border-bottom:14px solid #b39d6d;padding:26px 28px;background:#fffdf6}
+button,.latch{font-family:Bitter,serif;background:#fdfaf0;color:var(--blue);border:2px solid #8a7a55;border-radius:20px;padding:9px 20px;cursor:pointer;transition:background .5s,transform .15s}button:hover,.latch:hover{background:#f3dfae}button:active{transform:translateY(2px)}
+.fold{text-align:center;color:var(--lav);letter-spacing:6px;margin:10px 0}pre{background:#fdfaf0;border:1px solid var(--sand);padding:14px;overflow:auto}table{border-collapse:collapse}td,th{border-bottom:1px solid var(--sand);padding:6px 12px;text-align:left}
+.active{border-left:8px solid var(--lav)}img.banner{width:100%}img.logo{width:90px}</style></head><body>
+<div class="cabinet">
+<header class="shelf"><img class="logo" src="assets/logo.png" alt="Extension YouTube logo"><img class="banner" src="assets/banner.png" alt=""><h1>Extension YouTube</h1>
+<p><a href="https://github.com/Epsilon0xCell/Extension-YouTube">github.com/Epsilon0xCell/Extension-YouTube</a></p>
+<nav><a href="#run">Run it</a> · <a href="#files">The files</a> · <a href="#sheets">The sheets</a> · <a href="https://github.com/Epsilon0xCell/Extension-YouTube">The repo</a></nav>
+<p>A SillyTavern extension that adds YouTube Music function tools, backed by the ytmusic-api library (version 4.x). Search tools return real results; a few tools the library cannot support answer with an explicit limitation message instead of data.</p>
+<p>Extension YouTube: what it is, how it runs, where it stops.</p></header>
+<section class="shelf" id="run"><h2>Putting it in</h2><p>Requires the SillyTavern staging branch. Install through the extension installer using the repo URL above, then:</p><pre>npm install
+npm run build</pre><p>Webpack and TypeScript compile src into dist/index.js, the file manifest.json loads.</p></section>
+<div class="fold">· ❀ ·</div>
+<section class="shelf"><h2>Signing the register</h2><p>Authentication is by pasted YouTube Music cookie string. There is no OAuth flow.</p><ol><li>Log in at music.youtube.com</li><li>Open developer tools</li><li>Go to the Application tab</li><li>Storage, then Cookies</li><li>Copy the values as one string separated by semicolons</li></ol><p>Paste into the YouTube Music Cookies field and click <button type="button">Authenticate</button>. The client initialises first and cookies save only if that succeeds. Success shows [Authenticated]. No account name is shown because the library exposes no account endpoint. The stored expiry is a fixed 30 day estimate from sign in, with a warning when it sits within 3 days.</p></section>
+<section class="shelf"><h2>The nine tools</h2><h3>Working pile, backed by the library</h3><ul><li>Search Songs</li><li>Search Artists</li><li>Search Albums</li><li>Play Item, which returns a music.youtube.com URL to open and cannot start playback itself</li><li>Get Playlist Items by playlist ID</li></ul><h3>Limitation pile</h3><ul><li>Get Current Song</li><li>Get Queue</li><li>Get History</li><li>Get User Playlists</li></ul><p>Each limitation tool answers honestly because ytmusic-api 4.x has no endpoint for it. Each tool can be switched in settings. Search Songs, Play Item, and Get Current Song are on by default, the rest off.</p></section>
+<section class="shelf"><h2>The template that waits</h2><p>The prompt injection settings hold the {{song}}, {{artist}}, and {{album}} macros, plus role, position, and depth controls. At present nothing is injected, because filling the template needs the most recently played track and the library has neither a now playing nor a history endpoint. The interceptor runs on each generation, clears any stale injection, and logs why.</p></section>
+<section class="shelf" id="files"><h2>The files</h2><table><tr><th>File</th><th>Lines</th></tr><tr><td>package-lock.json</td><td>3588</td></tr><tr><td>src/tools.ts</td><td>491</td></tr><tr><td>src/settings.ts</td><td>185</td></tr><tr><td>src/auth.ts</td><td>138</td></tr><tr><td>src/settings.html</td><td>108</td></tr><tr><td>README.md</td><td>108</td></tr></table>
+<h3>The code, as it sits in the repo</h3><p>From package-lock.json, line 1799 on. I did not tidy it for the page.</p><pre><code>        &quot;node_modules/function-bind&quot;: {
             &quot;version&quot;: &quot;1.1.2&quot;,
             &quot;resolved&quot;: &quot;https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz&quot;,
             &quot;integrity&quot;: &quot;sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==&quot;,
@@ -126,42 +43,6 @@ footer { padding: 2rem 6vw; border-top: 1px solid var(--line);
                 &quot;function-bind&quot;: &quot;^1.1.2&quot;,
                 &quot;get-proto&quot;: &quot;^1.0.1&quot;,
                 &quot;gopd&quot;: &quot;^1.2.0&quot;,
-                &quot;has-symbols&quot;: &quot;^1.1.0&quot;,</code></pre>
-  </section>
-      <section id="files">
-        <h2>The files that matter</h2>
-        <table><tr><th>File</th><th>Lines</th></tr>
-        <tr><td><code>package-lock.json</code></td><td>3588</td></tr>
-        <tr><td><code>src/tools.ts</code></td><td>491</td></tr>
-        <tr><td><code>src/settings.ts</code></td><td>185</td></tr>
-        <tr><td><code>src/auth.ts</code></td><td>138</td></tr>
-        <tr><td><code>src/settings.html</code></td><td>108</td></tr>
-        <tr><td><code>README.md</code></td><td>108</td></tr>
-        </table>
-        <p>Names doing the work: <span class="mono">ytmusic_setCurrentTrack, y, z, e, s, s, p, a</span>.</p>
-      </section>
-      <section id="sheets">
-        <h2>Drawn by hand</h2>
-        <p>I sketch my projects on notebook paper so I have to
-        understand them well enough to draw them. The full set,
-        with the counts and how they were counted, is the
-        <a href="https://github.com/Epsilon0xCell/Extension-YouTube/tree/main/Extension-YouTube-Visuals">Extension-YouTube-Visuals</a>
-        folder in the repo. Nothing is drawn over the binder holes.
-        That is a rule, not a style.</p>
-        <div class="shots">
-          <img src="assets/architecture.png" alt="Hand drawn architecture sheet for Extension YouTube">
-          <img src="assets/flowchart.png" alt="Hand drawn flowchart sheet for Extension YouTube">
-          <img src="assets/product-map.png" alt="Hand drawn product map sheet for Extension YouTube">
-        </div>
-      </section>
-    </div>
-  </section>
-</main>
-<footer>
-  <p>Extension YouTube is one of my projects. This page was written
-  from the repo itself on 2026-10-30: the counts are the
-  repo's counts, the code is the repo's code, and the gaps are the
-  repo's gaps.</p>
-</footer>
-</body>
-</html>
+                &quot;has-symbols&quot;: &quot;^1.1.0&quot;,</code></pre></section>
+<section class="shelf" id="sheets"><h2>The sheets and the counts</h2><p><strong>What it is.</strong> Extension YouTube: 25 files and 5005 counted lines.</p><p><strong>The biggest piece.</strong> package-lock.json carries the most lines.</p><p><strong>The honest gap.</strong> No test files yet.</p><p>The full set is the <a href="https://github.com/Epsilon0xCell/Extension-YouTube/tree/main/Extension-YouTube-Visuals">Extension-YouTube-Visuals</a> folder.</p><img src="assets/architecture.png" alt="Hand drawn architecture sheet" style="width:32%"><img src="assets/flowchart.png" alt="Hand drawn flowchart sheet" style="width:32%"><img src="assets/product-map.png" alt="Hand drawn product map sheet" style="width:32%"></section>
+<footer class="shelf"><p>Licence: AGPL-3.0.</p></footer></div></body></html>
