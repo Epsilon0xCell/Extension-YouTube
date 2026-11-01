@@ -1,6 +1,14 @@
-![banner](assets/banner.png)
+![Intro: an airing cupboard in late morning light, folded linen in graded stacks, a wooden press, and one split lavender bag spilling purple buds across the top stack](intro-banner.png)
 
 # YouTube Music Extension for SillyTavern
+
+![Banner: the cupboard with its doors open, the lavender bag on the top stack, and Extension-YouTube inked on the paper label pasted to the cupboard door](banner.png)
+
+![banner](assets/banner.png)
+
+![Scene: a cupboard interior in three bands, light creeping across the stacks, a sheet settling onto a pile, the press screw turning, the lavender bag swelling once](assets-scene.svg)
+
+![Heading plate: the lavender bag drawn small above the first heading](sep-light.svg)
 
 A SillyTavern extension that adds YouTube Music function tools, backed
 by the `ytmusic-api` library (version 4.x). Search tools return real
@@ -16,6 +24,8 @@ Install via the extension installer using the following URL:
 ```txt
 https://github.com/Epsilon0xCell/Extension-YouTube
 ```
+
+![Separator: a brass pendulum bob swinging across a full width rule](sep-heavy.svg)
 
 ## Authentication
 
@@ -46,6 +56,8 @@ is no OAuth flow.
 The stored expiry is a fixed 30-day estimate counted from sign-in, not
 the real expiry of any individual cookie. The extension warns you when
 that estimate is within 3 days.
+
+> **Shelf label.** COOKIES SAVED ONLY AFTER A SUCCESSFUL SIGN IN
 
 ## Function tools
 
@@ -102,6 +114,8 @@ function-tool registration, and live calls against a real YouTube Music
 account all need a running SillyTavern with your cookies. The build,
 type check, lint, manifest validation, and the pure URL-parsing helpers
 in `src/util.ts` are verified headlessly.
+
+![Separator: the pendulum bob reduced to a short centred swing](sep-light.svg)
 
 ## License
 
