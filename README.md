@@ -1,8 +1,10 @@
-![Intro: an airing cupboard in late morning light, folded linen in graded stacks, a wooden press, and one split lavender bag spilling purple buds across the top stack](intro-banner.png)
+![Intro: one large coral play triangle resting on a spinning turquoise record, yellow sound bars rising like a skyline behind it, black squiggle ground pattern](intro-banner.png)
 
 # YouTube Music Extension for SillyTavern
 
-![Banner: the cupboard with its doors open, the lavender bag on the top stack, and Extension-YouTube inked on the paper label pasted to the cupboard door](banner.png)
+<p align="center"><img src="logo.png" alt="Extension-YouTube logo: a bold black vinyl record disc half covered by turquoise triangles, coral semicircles and a yellow zigzag" width="200"></p>
+
+![Banner: a row of vinyl records and cassette shapes in turquoise, coral and yellow marching across an off-white field of black squiggles and confetti shapes](banner.png)
 
 ![banner](assets/banner.png)
 
