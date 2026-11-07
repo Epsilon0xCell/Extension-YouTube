@@ -6,8 +6,6 @@
 
 ![Banner: a row of vinyl records and cassette shapes in turquoise, coral and yellow marching across an off-white field of black squiggles and confetti shapes](banner.png)
 
-![banner](assets/banner.png)
-
 ![Scene: a cupboard interior in three bands, light creeping across the stacks, a sheet settling onto a pile, the press screw turning, the lavender bag swelling once](assets-scene.svg)
 
 ![Heading plate: the lavender bag drawn small above the first heading](sep-light.svg)
